@@ -1,0 +1,467 @@
+t <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mark pc</title>
+<style>
+:root{
+--main:#1e6bff;
+--bg:#0b0b0f;
+--card:#15151b;
+}
+
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:#fff}
+
+header{background:#111;border-bottom:1px solid #222}
+.nav{max-width:1200px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:15px}
+.logo{font-size:24px;font-weight:900;color:var(--main)}
+.menu a{color:#fff;text-decoration:none;margin-left:15px;background:#1a1a22;padding:8px 12px;border-radius:6px}
+.menu a:hover{background:var(--main);color:#fff}
+
+.hero{padding:60px 20px;text-align:center;background:linear-gradient(120deg,#0b0b0f,#141420)}
+.hero h1{font-size:40px}
+
+.container{max-width:1200px;margin:auto;padding:30px 20px}
+
+.categories{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-top:20px}
+.cat{background:var(--card);padding:15px;border-radius:8px;text-align:center;cursor:pointer}
+
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-top:20px}
+
+.product{background:var(--card);border-radius:10px;padding:15px}
+.product img{width:100%;border-radius:6px}
+.price{color:var(--main);font-weight:bold}
+
+button{background:var(--main);color:#fff;border:0;padding:10px;border-radius:6px;margin-top:8px;cursor:pointer}
+button:hover{opacity:0.9}
+
+.whats{display:block;margin-top:8px;background:#25D366;color:#fff;text-align:center;padding:10px;border-radius:6px;text-decoration:none}
+
+.remove{background:#ff4d4d}
+.edit{background:#ffaa00}
+
+.admin{background:var(--card);padding:20px;border-radius:10px;margin-top:20px}
+
+input,textarea,select{width:100%;padding:10px;margin-top:10px;border:0;border-radius:6px;background:#222;color:#fff}
+
+.hidden{display:none}
+
+.admin-item{background:#222;padding:10px;border-radius:6px;margin-top:10px}
+
+.cartBtn{position:fixed;bottom:20px;right:20px;background:var(--main);color:#fff;padding:15px;border-radius:50px;font-weight:bold;cursor:pointer}
+
+.star{cursor:pointer;font-size:18px}
+
+</style>
+</head>
+<body>
+
+<header>
+<div class="nav">
+<div class="logo" id="logoText">PC STORE</div>
+<div class="menu">
+<a href="#" onclick="openPage('home')">Home</a>
+<a href="#" onclick="openPage('catalog')">Produtos</a>
+<a href="#" onclick="openPage('cartPage')">Carrinho</a>
+<a href="#" onclick="openPage('adminLogin')">Admin</a>
+</div>
+</div>
+</header>
+
+<div id="home">
+<div class="hero">
+<h1>Loja de Peças de PC</h1>
+<p>Placas de vídeo, processadores, RAM e muito mais</p>
+</div>
+
+<div class="container">
+<h2>Produtos em destaque ⭐</h2>
+<div id="featured" class="products"></div>
+
+<h2>Categorias</h2>
+<div id="categoryList" class="categories"></div>
+</div>
+</div>
+
+<div id="catalog" class="container hidden">
+<h2>Todos os Produtos</h2>
+<select id="filterCat" onchange="filterProducts()"></select>
+<div id="products" class="products"></div>
+</div>
+
+<div id="cartPage" class="container hidden">
+<h2>Seu Carrinho</h2>
+<div id="cartItems"></div>
+<button onclick="sendOrderWhats()">Comprar pelo WhatsApp</button>
+<button onclick="clearCart()">Limpar carrinho</button>
+</div>
+
+<div id="adminLogin" class="container hidden">
+<div class="admin">
+<h2>Login Admin</h2>
+<input id="user" placeholder="Usuário">
+<input id="pass" type="password" placeholder="Senha">
+<button onclick="login()">Entrar</button>
+</div>
+</div>
+
+<div id="adminPanel" class="container hidden">
+
+<div class="admin">
+<h2>Dashboard</h2>
+<p id="totalProducts"></p>
+<p id="totalCats"></p>
+</div>
+
+<div class="admin">
+<h2>Criar Produto</h2>
+<input id="title" placeholder="Nome">
+<select id="category"></select>
+<input id="price" placeholder="Preço">
+<textarea id="desc" placeholder="Descrição"></textarea>
+<input type="file" id="image">
+<label><input type="checkbox" id="featuredCheck"> Produto em destaque</label>
+<button onclick="createProduct()">Publicar</button>
+</div>
+
+<div class="admin">
+<h2>Categorias</h2>
+<input id="newCategory" placeholder="Nova categoria">
+<button onclick="addCategory()">Adicionar</button>
+<div id="adminCategories"></div>
+</div>
+
+<div class="admin">
+<h2>Configurações</h2>
+<input id="whatsappUrlInput" placeholder="URL WhatsApp">
+<input id="newPass" type="password" placeholder="Nova senha admin">
+<button onclick="saveSettings()">Salvar</button>
+</div>
+
+</div>
+
+<div class="cartBtn" onclick="openPage('cartPage')">🛒 <span id="cartCount">0</span></div>
+
+<script>
+
+function openPage(page){
+
+['home','catalog','cartPage','adminLogin','adminPanel'].forEach(id=>{
+let el=document.getElementById(id)
+if(el) el.classList.add('hidden')
+})
+
+let t=document.getElementById(page)
+if(t) t.classList.remove('hidden')
+
+if(page==='cartPage') loadCartPage()
+
+}
+
+const defaultCats=['GPU','CPU','RAM','SSD']
+
+function getCats(){
+let cats=JSON.parse(localStorage.getItem('cats'))
+if(!Array.isArray(cats)){
+cats=[...defaultCats]
+localStorage.setItem('cats',JSON.stringify(cats))
+}
+return cats
+}
+
+function loadCategories(){
+
+let cats=getCats()
+
+let list=document.getElementById('categoryList')
+let select=document.getElementById('category')
+let filter=document.getElementById('filterCat')
+let admin=document.getElementById('adminCategories')
+
+if(list) list.innerHTML=''
+if(select) select.innerHTML=''
+if(filter) filter.innerHTML='<option value="all">Todas</option>'
+if(admin) admin.innerHTML=''
+
+cats.forEach((c,i)=>{
+
+if(list){
+let d=document.createElement('div')
+d.className='cat'
+d.innerText=c
+d.onclick=()=>{openPage('catalog');filterCat.value=c;filterProducts()}
+list.appendChild(d)
+}
+
+if(select){
+let o=document.createElement('option')
+o.innerText=c
+select.appendChild(o)
+}
+
+if(filter){
+let o=document.createElement('option')
+o.innerText=c
+filter.appendChild(o)
+}
+
+if(admin){
+let d=document.createElement('div')
+d.className='admin-item'
+d.innerHTML=c+` <button onclick="deleteCat(${i})">X</button>`
+admin.appendChild(d)
+}
+
+})
+
+updateDashboard()
+
+}
+
+function addCategory(){
+let cats=getCats()
+if(newCategory.value==='')return
+cats.push(newCategory.value)
+localStorage.setItem('cats',JSON.stringify(cats))
+newCategory.value=''
+loadCategories()
+}
+
+function deleteCat(i){
+let cats=getCats()
+cats.splice(i,1)
+localStorage.setItem('cats',JSON.stringify(cats))
+loadCategories()
+}
+
+function login(){
+let passSaved=localStorage.getItem('adminPass')||'123'
+if(user.value==='admin' && pass.value===passSaved){
+openPage('adminPanel')
+}else alert('Login incorreto')
+}
+
+function saveSettings(){
+if(whatsappUrlInput.value) localStorage.setItem('whatsappUrl',whatsappUrlInput.value)
+if(newPass.value) localStorage.setItem('adminPass',newPass.value)
+alert('Salvo')
+}
+
+function createProduct(){
+
+let file=image.files[0]
+if(!file){alert('Imagem necessária');return}
+
+let r=new FileReader()
+
+r.onload=function(){
+
+let p={
+
+title:title.value,
+category:category.value,
+price:price.value,
+desc:desc.value,
+img:r.result,
+featured:featuredCheck.checked
+
+}
+
+let products=JSON.parse(localStorage.getItem('products')||'[]')
+products.push(p)
+localStorage.setItem('products',JSON.stringify(products))
+
+loadProducts()
+loadFeatured()
+updateDashboard()
+
+}
+
+r.readAsDataURL(file)
+
+}
+
+function loadProducts(){
+
+let products=JSON.parse(localStorage.getItem('products')||'[]')
+let box=document.getElementById('products')
+
+if(!box)return
+
+box.innerHTML=''
+
+products.forEach((p,i)=>{
+
+let d=document.createElement('div')
+d.className='product'
+
+let zap=localStorage.getItem('whatsappUrl')||''
+
+let zapBtn=''
+
+if(zap) zapBtn=`<a class="whats" target="_blank" href="${zap}?text=Tenho interesse em ${encodeURIComponent(p.title)}">Comprar no WhatsApp</a>`
+
+let adminBtns=''
+
+if(!document.getElementById('adminPanel').classList.contains('hidden')){
+adminBtns=`<button class="remove" onclick="deleteProduct(${i})">Excluir</button>`
+}
+
+
+d.innerHTML=`
+<img src="${p.img}">
+<h3>${p.title}</h3>
+<p>${p.category}</p>
+<p class="price">R$ ${p.price}</p>
+<p>${p.desc}</p>
+<button onclick="addCart('${p.title}','${p.price}')">Adicionar</button>
+${zapBtn}
+${adminBtns}
+`
+
+box.appendChild(d)
+
+})
+
+}
+
+function deleteProduct(i){
+let products=JSON.parse(localStorage.getItem('products')||'[]')
+products.splice(i,1)
+localStorage.setItem('products',JSON.stringify(products))
+loadProducts()
+loadFeatured()
+updateDashboard()
+}
+
+function loadFeatured(){
+
+let products=JSON.parse(localStorage.getItem('products')||'[]')
+let box=document.getElementById('featured')
+
+if(!box)return
+
+box.innerHTML=''
+
+products.filter(p=>p.featured).forEach(p=>{
+
+let d=document.createElement('div')
+d.className='product'
+
+d.innerHTML=`
+<img src="${p.img}">
+<h3>${p.title}</h3>
+<p class="price">R$ ${p.price}</p>
+`
+
+box.appendChild(d)
+
+})
+
+}
+
+function filterProducts(){
+
+let cat=filterCat.value
+let products=JSON.parse(localStorage.getItem('products')||'[]')
+let box=document.getElementById('products')
+
+box.innerHTML=''
+
+products.filter(p=>cat==='all'||p.category===cat).forEach((p,i)=>{
+
+let d=document.createElement('div')
+d.className='product'
+
+d.innerHTML=`
+<img src="${p.img}">
+<h3>${p.title}</h3>
+<p class="price">R$ ${p.price}</p>
+<button onclick="addCart('${p.title}','${p.price}')">Adicionar</button>
+`
+
+box.appendChild(d)
+
+})
+
+}
+
+function addCart(name,price){
+let cart=JSON.parse(localStorage.getItem('cart')||'[]')
+cart.push({name,price})
+localStorage.setItem('cart',JSON.stringify(cart))
+updateCart()
+}
+
+function loadCartPage(){
+let cart=JSON.parse(localStorage.getItem('cart')||'[]')
+let box=document.getElementById('cartItems')
+box.innerHTML=''
+cart.forEach((i,n)=>{
+let d=document.createElement('div')
+d.className='admin-item'
+d.innerHTML=`${i.name} - R$ ${i.price} <button class="remove" onclick="removeCart(${n})">X</button>`
+box.appendChild(d)
+})
+}
+
+function removeCart(i){
+let cart=JSON.parse(localStorage.getItem('cart')||'[]')
+cart.splice(i,1)
+localStorage.setItem('cart',JSON.stringify(cart))
+loadCartPage()
+updateCart()
+}
+
+function clearCart(){
+localStorage.removeItem('cart')
+loadCartPage()
+updateCart()
+}
+
+function sendOrderWhats(){
+
+let cart=JSON.parse(localStorage.getItem('cart')||'[]')
+let zap=localStorage.getItem('whatsappUrl')
+
+if(!zap){alert('Configure WhatsApp no admin');return}
+
+let text='Olá quero comprar:%0A'
+
+cart.forEach(i=>{
+text+=`- ${i.name} | R$ ${i.price}%0A`
+})
+
+window.open(zap+'?text='+text)
+
+}
+
+function updateCart(){
+let cart=JSON.parse(localStorage.getItem('cart')||'[]')
+let el=document.getElementById('cartCount')
+if(el) el.innerText=cart.length
+}
+
+function updateDashboard(){
+
+let p=JSON.parse(localStorage.getItem('products')||'[]')
+let c=getCats()
+
+let tp=document.getElementById('totalProducts')
+let tc=document.getElementById('totalCats')
+
+if(tp) tp.innerText='Produtos cadastrados: '+p.length
+if(tc) tc.innerText='Categorias: '+c.length
+
+}
+
+loadCategories()
+loadProducts()
+loadFeatured()
+updateCart()
+
+</script>
+
+</body>
+</html>
