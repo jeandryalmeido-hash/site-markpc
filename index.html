@@ -135,7 +135,7 @@ button{padding:10px;margin-top:10px;cursor:pointer}
 <img id="logo" class="logo">
 <h1>Computador lento?</h1>
 <p>Deixamos seu PC como novo</p>
-<a id="zapBtn" class="btnZap">WhatsApp</a>
+<a id="zapBtn" class="btnZap" target="_blank">WhatsApp</a>
 </div>
 </div>
 
@@ -155,8 +155,8 @@ button{padding:10px;margin-top:10px;cursor:pointer}
 
 <!-- LOGIN -->
 <div id="adminLogin" class="admin hidden">
-<input id="user">
-<input id="pass" type="password">
+<input id="user" placeholder="Usuário">
+<input id="pass" type="password" placeholder="Senha">
 <button onclick="login()">Entrar</button>
 </div>
 
@@ -169,19 +169,16 @@ button{padding:10px;margin-top:10px;cursor:pointer}
 <input type="file" id="bannerInput">
 <input type="file" id="logoInput">
 
-<h3>📲 Whats</h3>
-<input id="zapInput">
-
 <h3>🛠️ Serviços</h3>
-<input id="srvName">
-<input id="srvPrice">
+<input id="srvName" placeholder="Nome do serviço">
+<input id="srvPrice" placeholder="Preço do serviço">
 <input type="file" id="srvImg">
 <button onclick="addService()">Adicionar</button>
 <div id="adminServices"></div>
 
 <h3>🛒 Produtos</h3>
-<input id="prdName">
-<input id="prdPrice">
+<input id="prdName" placeholder="Nome do produto">
+<input id="prdPrice" placeholder="Preço do produto">
 <input type="file" id="prdImg">
 <button onclick="addProduct()">Adicionar</button>
 <div id="adminProducts"></div>
@@ -220,7 +217,7 @@ r.onload=()=>{localStorage.logo=r.result;loadAll()}
 r.readAsDataURL(logoInput.files[0])
 }
 
-localStorage.zap=zapInput.value
+// input do WhatsApp removido, link fixo no código
 }
 
 /* SERVIÇO */
@@ -267,9 +264,8 @@ function loadAll(){
 if(localStorage.banner) banner.src=localStorage.banner
 if(localStorage.logo) logo.src=localStorage.logo
 
-if(localStorage.zap){
-zapBtn.href=localStorage.zap
-}
+// Link fixo do WhatsApp
+zapBtn.href = "https://wa.me/5534999046747?text=Olá quero atendimento";
 
 /* SERVIÇOS */
 let s=JSON.parse(localStorage.srv||"[]")
@@ -290,7 +286,7 @@ serviceList.innerHTML+=`
 <img src="${x.img}">
 <h3>${x.name}</h3>
 <div class="price">R$ ${x.price}</div>
-<a class="btnZap" target="_blank" href="${localStorage.zap}?text=${msg}">
+<a class="btnZap" target="_blank" href="https://wa.me/5534999046747?text=${msg}">
 Comprar no WhatsApp
 </a>
 </div>`
