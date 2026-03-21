@@ -2,43 +2,30 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin</title>
-
 <style>
 body{
-margin:0;
-font-family:Arial;
 background:#0b0d12;
 color:#fff;
+font-family:Arial;
 padding:20px;
-}
-
-.top{
-display:flex;
-justify-content:space-between;
-align-items:center;
 }
 </style>
 </head>
 
 <body>
 
-<div class="top">
 <h2>Painel Admin</h2>
 <button onclick="logout()">Sair</button>
-</div>
-
-<p>Você está logado 👍</p>
 
 <script>
-if(localStorage.admin !== 'true'){
-window.location.href='login.html'
+if(localStorage.admin!=='true'){
+window.location='login.html'
 }
 
 function logout(){
 localStorage.removeItem('admin')
-window.location.href='login.html'
+window.location='login.html'
 }
 </script>
 
