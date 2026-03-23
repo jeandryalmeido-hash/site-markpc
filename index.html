@@ -1751,3 +1751,22 @@
   </script>
 </body>
 </html>
+<script>
+async function salvarCliente() {
+  await fetch("/api/salvar", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      nome: "Teste funcionando"
+    })
+  });
+
+  alert("Salvo no banco!");
+}
+</script>
+
+<button onclick="salvarCliente()">
+  Testar MongoDB
+</button>
