@@ -335,7 +335,6 @@
         <a href="#servicos">Serviços</a>
         <a href="#feedbacks">Feedbacks</a>
         <a href="#admin">Admin</a>
-        <button id="openLoginBtn">Entrar no Admin</button>
       </nav>
     </div>
   </header>
@@ -384,11 +383,24 @@
             <a href="#vendas" class="btn btn-primary">Ver ofertas</a>
             <a href="#admin" class="btn btn-secondary">Personalizar site</a>
           </div>
-        </div>
         <div class="promo-card reveal">
-          <span class="badge">🎯 Personalização total</span>
-          <h3>Edite nome, cores, banners, produtos, serviços e feedbacks</h3>
-          <p>Este projeto salva tudo no navegador com localStorage. Você pode testar, personalizar e depois evoluir para backend real quando quiser.</p>
+  <span class="badge">🚀 TechPrime</span>
+  <h3>Assistência técnica especializada em informática</h3>
+  <p>
+    Formatação, upgrades, limpeza, remoção de vírus e montagem de computadores com desempenho profissional.
+  </p>
+
+  <ul style="margin-top:10px; line-height:1.8;">
+    <li>💻 Formatação completa</li>
+    <li>⚡ Upgrade SSD e memória</li>
+    <li>🛠️ Conserto de notebook e PC</li>
+    <li>🔐 Segurança e antivírus</li>
+  </ul>
+
+  <div style="margin-top:15px;">
+    <a href="#" class="btn btn-success">Falar no WhatsApp</a>
+  </div>
+</div>
         </div>
       </div>
     </section>
@@ -468,7 +480,6 @@
         <div class="section-head reveal">
           <div>
             <h2>Painel administrativo</h2>
-            <p>Login bonito, sidebar, gestão de conteúdo e personalização visual em um só arquivo.</p>
           </div>
           <button class="btn btn-primary" id="adminAccessBtn">Abrir admin</button>
         </div>
@@ -743,7 +754,6 @@
     // =========================
     // CONFIGURAÇÃO INICIAL
     // =========================
-    const STORAGE_KEY = 'techprime_single_file_site_v1';
 
     const defaultState = {
       admin: {
@@ -919,27 +929,6 @@
     function clone(data) {
       return JSON.parse(JSON.stringify(data));
     }
-
-    function loadState() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultState));
-        return clone(defaultState);
-      }
-
-      try {
-        const parsed = JSON.parse(raw);
-        return deepMerge(clone(defaultState), parsed);
-      } catch {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultState));
-        return clone(defaultState);
-      }
-    }
-
-    function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }
-
     function deepMerge(target, source) {
       for (const key in source) {
         if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
@@ -1367,7 +1356,7 @@
 
       if (user === state.admin.username && pass === state.admin.password) {
         state.admin.loggedIn = true;
-        saveState();
+
         renderAdminState();
         closeLogin();
         document.querySelector('#admin').scrollIntoView({ behavior: 'smooth' });
@@ -1378,7 +1367,7 @@
 
     $('#logoutBtn').addEventListener('click', () => {
       state.admin.loggedIn = false;
-      saveState();
+  
       renderAdminState();
     });
 
@@ -1412,7 +1401,6 @@
         heroTitle: $('#cfgHeroTitle').value.trim() || defaultState.config.heroTitle,
         heroText: $('#cfgHeroText').value.trim() || defaultState.config.heroText
       });
-      saveState();
       renderAll();
     });
 
@@ -1430,7 +1418,6 @@
         animations: $('#cfgAnimations').checked,
         whatsappFloat: $('#cfgWhatsappFloat').checked
       });
-      saveState();
       renderAll();
     });
 
@@ -1442,7 +1429,6 @@
         stat2: $('#stat2Input').value.trim() || defaultState.config.stat2,
         stat3: $('#stat3Input').value.trim() || defaultState.config.stat3
       });
-      saveState();
       renderAll();
     });
 
@@ -1452,7 +1438,6 @@
       state.config.sections.feedbacks = $('#secFeedbacks').checked;
       state.config.sections.benefits = $('#secBenefits').checked;
       state.config.whatsappMessage = $('#whatsMessage').value.trim() || defaultState.config.whatsappMessage;
-      saveState();
       renderAll();
     });
 
@@ -1474,37 +1459,37 @@
       $('#cancelEditProductBtn').classList.add('hidden');
       $('#saveProductBtn').textContent = 'Salvar produto';
     }
+$('#saveProductBtn').addEventListener('click', async () => {
+  const payload = {
+    nome: $('#prodName').value.trim(),
+    categoria: $('#prodCategory').value.trim(),
+    imagem: $('#prodImage').value.trim(),
+    descricao: $('#prodDescription').value.trim(),
+    preco: Number($('#prodPrice').value || 0),
+    precoPromocional: $('#prodPromoPrice').value ? Number($('#prodPromoPrice').value) : null,
+    linkCompra: $('#prodBuyLink').value.trim(),
+    destaque: $('#prodHighlight').checked,
+    oculto: $('#prodHidden').checked,
+    emEstoque: $('#prodStock').checked,
+    criadoEm: new Date()
+  };
 
-    $('#saveProductBtn').addEventListener('click', () => {
-      const payload = {
-        id: state.editing.productId || uid(),
-        name: $('#prodName').value.trim(),
-        category: $('#prodCategory').value.trim(),
-        image: $('#prodImage').value.trim(),
-        description: $('#prodDescription').value.trim(),
-        price: Number($('#prodPrice').value || 0),
-        promoPrice: $('#prodPromoPrice').value ? Number($('#prodPromoPrice').value) : null,
-        buyLink: $('#prodBuyLink').value.trim(),
-        highlight: $('#prodHighlight').checked,
-        hidden: $('#prodHidden').checked,
-        inStock: $('#prodStock').checked
-      };
+  if (!payload.nome || !payload.categoria || !payload.preco) {
+    alert('Preencha nome, categoria e preço do produto.');
+    return;
+  }
 
-      if (!payload.name || !payload.category || !payload.price) {
-        alert('Preencha nome, categoria e preço do produto.');
-        return;
-      }
+  await fetch('/api/salvar', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
 
-      if (state.editing.productId) {
-        state.products = state.products.map(item => item.id === state.editing.productId ? payload : item);
-      } else {
-        state.products.unshift(payload);
-      }
-
-      saveState();
-      resetProductForm();
-      renderAll();
-    });
+  alert('Produto salvo no banco!');
+  resetProductForm();
+});
 
     $('#cancelEditProductBtn').addEventListener('click', resetProductForm);
 
@@ -1531,7 +1516,6 @@
     function deleteProduct(id) {
       if (!confirm('Deseja remover este produto?')) return;
       state.products = state.products.filter(p => p.id !== id);
-      saveState();
       renderAll();
     }
 
@@ -1580,7 +1564,6 @@
         state.services.unshift(payload);
       }
 
-      saveState();
       resetServiceForm();
       renderAll();
     });
@@ -1610,7 +1593,6 @@
     function deleteService(id) {
       if (!confirm('Deseja remover este serviço?')) return;
       state.services = state.services.filter(s => s.id !== id);
-      saveState();
       renderAll();
     }
 
@@ -1651,7 +1633,6 @@
         state.feedbacks.unshift(payload);
       }
 
-      saveState();
       resetFeedbackForm();
       renderAll();
     });
@@ -1677,7 +1658,6 @@
     function deleteFeedback(id) {
       if (!confirm('Deseja remover este feedback?')) return;
       state.feedbacks = state.feedbacks.filter(f => f.id !== id);
-      saveState();
       renderAll();
     }
 
@@ -1751,79 +1731,3 @@
   </script>
 </body>
 </html>
-<div id="admin-area" style="display: none; margin-top: 40px; padding: 24px; border-radius: 16px; background: rgba(10, 20, 40, 0.9); border: 1px solid rgba(255,255,255,0.08);">
-  <h2 style="margin-bottom: 16px;">Área administrativa</h2>
-
-  <button
-    onclick="salvarCliente()"
-    style="padding: 12px 18px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; background: #4f8cff; color: white; margin-bottom: 20px;"
-  >
-    Testar MongoDB
-  </button>
-
-  <h3 style="margin-bottom: 12px;">Clientes cadastrados</h3>
-  <ul id="lista-clientes" style="list-style: none; padding: 0; margin: 0;"></ul>
-</div>
-
-<script>
-  const ADMIN_CHAVE = "markadmin";
-  const ADMIN_SENHA = "1290";
-
-  function mostrarAdmin() {
-    const adminArea = document.getElementById("admin-area");
-    adminArea.style.display = "block";
-    carregarClientes();
-  }
-
-  function verificarAdmin() {
-    const params = new URLSearchParams(window.location.search);
-    const admin = params.get("admin");
-
-    if (sessionStorage.getItem("admin_ok") === "1") {
-      mostrarAdmin();
-      return;
-    }
-
-    if (admin === ADMIN_CHAVE) {
-      const senha = prompt("Digite a senha do admin:");
-      if (senha === ADMIN_SENHA) {
-        sessionStorage.setItem("admin_ok", "1");
-        mostrarAdmin();
-      }
-    }
-  }
-
-  async function salvarCliente() {
-    await fetch("/api/salvar", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        nome: "Teste funcionando"
-      })
-    });
-
-    alert("Salvo no banco!");
-    carregarClientes();
-  }
-
-  async function carregarClientes() {
-    const res = await fetch("/api/salvar");
-    const clientes = await res.json();
-
-    const lista = document.getElementById("lista-clientes");
-    lista.innerHTML = "";
-
-    clientes.reverse().forEach(cliente => {
-      lista.innerHTML += `
-        <li style="margin-bottom: 16px; padding: 14px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">
-          <strong style="font-size: 18px;">${cliente.nome}</strong><br>
-          <small>${new Date(cliente.criadoEm).toLocaleString()}</small>
-        </li>
-      `;
-    });
-  }
-
-  verificarAdmin();
-</script>
