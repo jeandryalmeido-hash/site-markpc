@@ -1769,4 +1769,25 @@ async function salvarCliente() {
 
 <button onclick="salvarCliente()">
   Testar MongoDB
-</button>
+</button><h2>Clientes cadastrados</h2>
+<ul id="lista-clientes"></ul><script>
+async function carregarClientes() {
+  const res = await fetch("/api/salvar");
+  const clientes = await res.json();
+
+  const lista = document.getElementById("lista-clientes");
+  lista.innerHTML = "";
+
+  clientes.forEach(cliente => {
+    lista.innerHTML += `
+      <li>
+        <strong>${cliente.nome}</strong><br>
+        ${new Date(cliente.criadoEm).toLocaleString()}
+      </li>
+      <hr>
+    `;
+  });
+}
+
+carregarClientes();
+</script>
