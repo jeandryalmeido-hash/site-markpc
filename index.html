@@ -1043,62 +1043,87 @@
       select.innerHTML = `<option value="all">Todas as categorias</option>` + categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
     }
 
-    function renderProducts() {
-      $('#vendas').classList.toggle('hidden', !state.config.sections.products);
-      renderProductFilters();
+    async function renderProducts() {
+  const section = document.getElementById('vendas');
+  const grid = document.getElementById('productsGrid');
+  const search = (document.getElementById('productSearch')?.value || '').toLowerCase().trim();
+  const category = document.getElementById('productCategoryFilter')?.value || 'all';
+  const stock = document.getElementById('productStockFilter')?.value || 'all';
 
-      const search = ($('#productSearch').value || '').toLowerCase().trim();
-      const category = $('#productCategoryFilter').value || 'all';
-      const stock = $('#productStockFilter').value || 'all';
+  section.classList.toggle('hidden', !state.config.sections.products);
 
-      const items = state.products.filter(item => {
-        if (item.hidden) return false;
-        if (search && !item.name.toLowerCase().includes(search)) return false;
-        if (category !== 'all' && item.category !== category) return false;
-        if (stock === 'in' && !item.inStock) return false;
-        if (stock === 'out' && item.inStock) return false;
-        return true;
-      });
+  const res = await fetch('/api/salvar');
+  const produtos = await res.json();
 
-      const grid = $('#productsGrid');
-      if (!items.length) {
-        grid.innerHTML = `<div class="empty-card" style="grid-column: 1 / -1"><h3>Produtos em breve!</h3><p>Nenhum produto disponível com esse filtro.</p></div>`;
-        return;
-      }
+  const categorias = [...new Set(
+    produtos
+      .filter(p => !p.oculto)
+      .map(p => p.categoria)
+      .filter(Boolean)
+  )];
 
-      const sorted = [...items].sort((a, b) => Number(b.highlight) - Number(a.highlight));
-      grid.innerHTML = sorted.map(item => {
-        const finalLink = item.buyLink ? item.buyLink : waLink(`Olá! Tenho interesse no produto: ${item.name}`);
-        return `
-          <article class="item-card reveal">
-            <div class="item-image">
-              <img src="${safeUrl(item.image, getPlaceholder('product'))}" alt="${item.name}" />
+  const select = document.getElementById('productCategoryFilter');
+  select.innerHTML =
+    `<option value="all">Todas as categorias</option>` +
+    categorias.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+
+  if (category !== 'all') {
+    select.value = category;
+  }
+
+  const filtrados = produtos.filter(item => {
+    if (item.oculto) return false;
+    if (search && !String(item.nome || '').toLowerCase().includes(search)) return false;
+    if (category !== 'all' && item.categoria !== category) return false;
+    if (stock === 'in' && !item.emEstoque) return false;
+    if (stock === 'out' && item.emEstoque) return false;
+    return true;
+  });
+
+  if (!filtrados.length) {
+    grid.innerHTML = `<div class="empty-card" style="grid-column: 1 / -1"><h3>Produtos em breve!</h3><p>Nenhum produto disponível com esse filtro.</p></div>`;
+    return;
+  }
+
+  const ordenados = [...filtrados].sort((a, b) => Number(b.destaque) - Number(a.destaque));
+
+  grid.innerHTML = ordenados.map(item => `
+    <article class="item-card reveal">
+      <div class="item-image">
+        <img src="${item.imagem || 'https://images.unsplash.com/photo-1517336714739-489689fd1ca8?auto=format&fit=crop&w=1200&q=80'}" alt="${item.nome || 'Produto'}" />
+      </div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <h3 style="margin:0 0 8px">${item.nome || 'Sem nome'}</h3>
+            <div class="tag-row">
+              <span class="tag">${item.categoria || 'Sem categoria'}</span>
+              ${item.destaque ? '<span class="tag highlight">Destaque</span>' : ''}
+              ${item.emEstoque ? '<span class="tag">Em estoque</span>' : '<span class="tag warning">Sem estoque</span>'}
             </div>
-            <div class="card-body">
-              <div class="card-top">
-                <div>
-                  <h3 style="margin:0 0 8px">${item.name}</h3>
-                  <div class="tag-row">
-                    <span class="tag">${item.category || 'Sem categoria'}</span>
-                    ${item.highlight ? '<span class="tag highlight">Destaque</span>' : ''}
-                    ${item.inStock ? '<span class="tag">Em estoque</span>' : '<span class="tag warning">Sem estoque</span>'}
-                  </div>
-                </div>
-              </div>
-              <p class="muted" style="margin:0">${item.description || 'Sem descrição.'}</p>
-              <div class="price-row">
-                <span class="price">${formatPrice(item.promoPrice || item.price)}</span>
-                ${item.promoPrice ? `<span class="old-price">${formatPrice(item.price)}</span>` : ''}
-              </div>
-              <div class="card-actions">
-                <a class="btn btn-primary" href="${finalLink}" target="_blank" rel="noopener">Comprar</a>
-                <a class="btn btn-secondary" href="${waLink(`Olá! Quero mais informações sobre o produto: ${item.name}`)}" target="_blank" rel="noopener">WhatsApp</a>
-              </div>
-            </div>
-          </article>
-        `;
-      }).join('');
-    }
+          </div>
+        </div>
+
+        <p class="muted" style="margin:0">${item.descricao || 'Sem descrição.'}</p>
+
+        <div class="price-row">
+          <span class="price">${Number(item.precoPromocional || item.preco || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+          ${item.precoPromocional ? `<span class="old-price">${Number(item.preco || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>` : ''}
+        </div>
+
+        <div class="card-actions">
+          <a class="btn btn-primary" target="_blank" href="${item.linkCompra || '#'}">
+            Comprar
+          </a>
+          <a class="btn btn-secondary" target="_blank"
+             href="https://wa.me/5511999999999?text=${encodeURIComponent(`Olá! Quero mais informações sobre o produto: ${item.nome || 'produto'}`)}">
+            WhatsApp
+          </a>
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
 
     function renderServiceFilters() {
       const categories = [...new Set(state.services.filter(s => !s.hidden).map(s => s.category).filter(Boolean))];
@@ -1235,28 +1260,34 @@
       $('#whatsMessage').value = c.whatsappMessage;
     }
 
-    function renderProductsTable() {
-      const tbody = $('#productsTable');
-      tbody.innerHTML = state.products.map(item => `
-        <tr>
-          <td><strong style="color:#fff">${item.name}</strong><br><small>${item.description || ''}</small></td>
-          <td>${item.category || '-'}</td>
-          <td>${formatPrice(item.promoPrice || item.price)}</td>
-          <td>
-            ${item.hidden ? 'Oculto' : 'Visível'}<br>
-            ${item.highlight ? 'Destaque' : 'Normal'}<br>
-            ${item.inStock ? 'Em estoque' : 'Sem estoque'}
-          </td>
-          <td>
-            <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <button class="btn btn-secondary edit-product" data-id="${item.id}">Editar</button>
-              <button class="btn btn-danger delete-product" data-id="${item.id}">Remover</button>
-            </div>
-          </td>
-        </tr>
-      `).join('') || `<tr><td colspan="5">Nenhum produto cadastrado.</td></tr>`;
-    }
+async function renderProductsTable() {
+  const tbody = $('#productsTable');
 
+  const res = await fetch('/api/salvar');
+  const produtos = await res.json();
+
+  tbody.innerHTML = produtos.map(item => `
+    <tr>
+      <td>
+        <strong style="color:#fff">${item.nome || ''}</strong><br>
+        <small>${item.descricao || ''}</small>
+      </td>
+      <td>${item.categoria || '-'}</td>
+      <td>${formatPrice(item.precoPromocional || item.preco || 0)}</td>
+      <td>
+        ${item.oculto ? 'Oculto' : 'Visível'}<br>
+        ${item.destaque ? 'Destaque' : 'Normal'}<br>
+        ${item.emEstoque ? 'Em estoque' : 'Sem estoque'}
+      </td>
+      <td>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-secondary edit-product" data-id="${item._id || item.id}">Editar</button>
+          <button class="btn btn-danger delete-product" data-id="${item._id || item.id}">Remover</button>
+        </div>
+      </td>
+    </tr>
+  `).join('') || `<tr><td colspan="5">Nenhum produto cadastrado.</td></tr>`;
+}
     function renderServicesTable() {
       const tbody = $('#servicesTable');
       tbody.innerHTML = state.services.map(item => `
