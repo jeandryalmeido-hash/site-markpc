@@ -1,0 +1,9 @@
+{
+  "name": "markpc-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Site em HTML, CSS e JS puro com Vercel + MongoDB",
+  "dependencies": {
+    "mongodb": "^6.8.0"
+  }
+}

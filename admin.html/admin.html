@@ -1,138 +1,108 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin MongoDB - TechPrime</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Inter, Arial, sans-serif;
-      background: #07111f;
-      color: #f5f7fb;
-      padding: 40px 20px;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .card {
-      margin-top: 24px;
-      padding: 24px;
-      border-radius: 16px;
-      background: rgba(10, 20, 40, 0.9);
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-
-    button {
-      padding: 12px 18px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 700;
-      background: #4f8cff;
-      color: white;
-      margin-bottom: 20px;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    li {
-      margin-bottom: 16px;
-      padding: 14px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-
-    a {
-      color: #9cc2ff;
-      text-decoration: none;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin | MarkPC</title>
+  <link rel="stylesheet" href="./style.css" />
 </head>
-<body>
-  <div class="container">
-    <h1>Área administrativa</h1>
-    <p><a href="/">Voltar para o site</a></p>
+<body class="admin-body">
+  <header class="topbar">
+    <div class="container topbar-content">
+      <a href="./index.html" class="logo">
+        <span class="logo-mark">Mark</span><span class="logo-pc">PC</span>
+      </a>
 
-    <div class="card">
-      <button onclick="salvarCliente()">Testar MongoDB</button>
-
-      <h3 style="margin-bottom: 12px;">Clientes cadastrados</h3>
-      <ul id="lista-clientes"></ul>
+      <nav class="nav">
+        <a href="./index.html">Voltar ao site</a>
+      </nav>
     </div>
-  </div>
+  </header>
 
-  <script>
-    const ADMIN_CHAVE = "markadmin";
-    const ADMIN_SENHA = "1290";
-
-    function verificarAdmin() {
-      const params = new URLSearchParams(window.location.search);
-      const admin = params.get("admin");
-
-      if (sessionStorage.getItem("admin_ok") === "1") {
-        carregarClientes();
-        return;
-      }
-
-      if (admin === ADMIN_CHAVE) {
-        const senha = prompt("Digite a senha do admin:");
-        if (senha === ADMIN_SENHA) {
-          sessionStorage.setItem("admin_ok", "1");
-          carregarClientes();
-          return;
-        }
-      }
-
-      document.body.innerHTML = `
-        <div style="padding:40px;font-family:Arial;color:white;background:#07111f;min-height:100vh">
-          <h1>Acesso restrito</h1>
-          <p>Abra com a chave correta.</p>
+  <main class="section">
+    <div class="container admin-layout">
+      <section class="admin-card">
+        <div class="section-head admin-head">
+          <div>
+            <span class="section-kicker">Painel administrativo</span>
+            <h2>Cadastrar produto</h2>
+          </div>
+          <button id="btn-testar-conexao" class="btn btn-outline" type="button">
+            Testar conexão
+          </button>
         </div>
-      `;
-    }
 
-    async function salvarCliente() {
-      await fetch("/api/salvar", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          nome: "Teste funcionando"
-        })
-      });
+        <form id="produto-form" class="admin-form">
+          <div class="form-grid">
+            <div class="field">
+              <label for="nome">Nome</label>
+              <input id="nome" name="nome" type="text" required />
+            </div>
 
-      alert("Salvo no banco!");
-      carregarClientes();
-    }
+            <div class="field">
+              <label for="categoria">Categoria</label>
+              <input id="categoria" name="categoria" type="text" required />
+            </div>
 
-    async function carregarClientes() {
-      const res = await fetch("/api/salvar");
-      const clientes = await res.json();
+            <div class="field">
+              <label for="imagem">Imagem (URL)</label>
+              <input id="imagem" name="imagem" type="url" placeholder="https://..." />
+            </div>
 
-      const lista = document.getElementById("lista-clientes");
-      lista.innerHTML = "";
+            <div class="field">
+              <label for="preco">Preço normal</label>
+              <input id="preco" name="preco" type="number" step="0.01" min="0" />
+            </div>
 
-      clientes.reverse().forEach(cliente => {
-        lista.innerHTML += `
-          <li>
-            <strong style="font-size: 18px;">${cliente.nome}</strong><br>
-            <small>${new Date(cliente.criadoEm).toLocaleString()}</small>
-          </li>
-        `;
-      });
-    }
+            <div class="field">
+              <label for="precoPromocional">Preço promocional</label>
+              <input id="precoPromocional" name="precoPromocional" type="number" step="0.01" min="0" />
+            </div>
 
-    verificarAdmin();
-  </script>
+            <div class="field">
+              <label for="linkCompra">Link de compra</label>
+              <input id="linkCompra" name="linkCompra" type="url" placeholder="https://..." />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="descricao">Descrição</label>
+            <textarea id="descricao" name="descricao" rows="4"></textarea>
+          </div>
+
+          <div class="checks">
+            <label><input id="destaque" type="checkbox" /> Destaque</label>
+            <label><input id="oculto" type="checkbox" /> Oculto</label>
+            <label><input id="emEstoque" type="checkbox" checked /> Em estoque</label>
+          </div>
+
+          <div class="admin-actions">
+            <button class="btn btn-primary" type="submit">Salvar produto</button>
+            <button class="btn btn-outline" type="reset">Limpar</button>
+          </div>
+        </form>
+
+        <div id="status" class="status-box">Aguardando ação...</div>
+      </section>
+
+      <section class="admin-card">
+        <div class="section-head admin-head">
+          <div>
+            <span class="section-kicker">Gerenciamento</span>
+            <h2>Produtos cadastrados</h2>
+          </div>
+          <button id="btn-atualizar-lista" class="btn btn-outline" type="button">
+            Atualizar lista
+          </button>
+        </div>
+
+        <div id="admin-produtos-lista" class="admin-products-list">
+          <div class="empty-card">Carregando lista...</div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="./admin.js"></script>
 </body>
 </html>
