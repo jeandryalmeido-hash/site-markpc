@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - MarkPC</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="admin-body">
+
+  <header class="topo">
+    <div class="container topo-wrap">
+      <div class="logo">MarkPC Admin</div>
+
+      <nav class="menu">
+        <a href="index.html">Ver site</a>
+        <a href="#cadastro">Cadastrar</a>
+        <a href="#lista">Produtos</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    <div class="container">
+
+      <section class="admin-painel">
+        <div class="admin-header">
+          <div>
+            <span class="mini-tag">Painel administrativo</span>
+            <h1>Gerenciar produtos</h1>
+            <p>Cadastre, liste e apague produtos do site.</p>
+          </div>
+
+          <div class="admin-acoes-topo">
+            <button id="btn-testar-conexao" class="btn btn-secundario" type="button">
+              Testar conexão
+            </button>
+          </div>
+        </div>
+
+        <div id="status-conexao" class="status-box">
+          Aguardando teste de conexão...
+        </div>
+      </section>
+
+      <section class="admin-grid">
+        <section class="admin-card" id="cadastro">
+          <div class="admin-card-topo">
+            <h2>Cadastrar produto</h2>
+            <p>Preencha os dados abaixo.</p>
+          </div>
+
+          <form id="form-produto" class="form-admin">
+            <div class="campo">
+              <label for="nome">Nome do produto</label>
+              <input type="text" id="nome" name="nome" required />
+            </div>
+
+            <div class="dupla">
+              <div class="campo">
+                <label for="categoria">Categoria</label>
+                <input type="text" id="categoria" name="categoria" placeholder="Ex: SSD, RAM, Placa de vídeo" />
+              </div>
+
+              <div class="campo">
+                <label for="imagem">URL da imagem</label>
+                <input type="text" id="imagem" name="imagem" placeholder="https://..." />
+              </div>
+            </div>
+
+            <div class="campo">
+              <label for="descricao">Descrição</label>
+              <textarea id="descricao" name="descricao" rows="4" required></textarea>
+            </div>
+
+            <div class="tripla">
+              <div class="campo">
+                <label for="preco">Preço normal</label>
+                <input type="number" id="preco" name="preco" step="0.01" min="0" />
+              </div>
+
+              <div class="campo">
+                <label for="precoPromocional">Preço promocional</label>
+                <input type="number" id="precoPromocional" name="precoPromocional" step="0.01" min="0" />
+              </div>
+
+              <div class="campo">
+                <label for="linkCompra">Link de compra</label>
+                <input type="text" id="linkCompra" name="linkCompra" placeholder="https://..." />
+              </div>
+            </div>
+
+            <div class="checks">
+              <label class="check-item">
+                <input type="checkbox" id="destaque" name="destaque" />
+                <span>Produto em destaque</span>
+              </label>
+
+              <label class="check-item">
+                <input type="checkbox" id="oculto" name="oculto" />
+                <span>Oculto</span>
+              </label>
+
+              <label class="check-item">
+                <input type="checkbox" id="emEstoque" name="emEstoque" checked />
+                <span>Em estoque</span>
+              </label>
+            </div>
+
+            <div class="form-acoes">
+              <button type="submit" class="btn btn-principal">Salvar produto</button>
+              <button type="reset" class="btn btn-secundario">Limpar</button>
+            </div>
+          </form>
+
+          <div id="mensagem-admin" class="status-box neutro">
+            Preencha o formulário para cadastrar.
+          </div>
+        </section>
+
+        <section class="admin-card" id="lista">
+          <div class="admin-card-topo">
+            <h2>Produtos cadastrados</h2>
+            <p>Lista de produtos do banco.</p>
+          </div>
+
+          <div class="lista-acoes">
+            <button id="btn-recarregar" class="btn btn-secundario" type="button">
+              Recarregar lista
+            </button>
+          </div>
+
+          <div id="lista-admin-produtos" class="lista-admin-produtos">
+            <div class="produto-admin-vazio">Nenhum produto carregado ainda.</div>
+          </div>
+        </section>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="admin.js"></script>
+</body>
+</html>
