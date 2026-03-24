@@ -141,4 +141,71 @@
 
   <script src="admin.js"></script>
 </body>
-</html>
+</html><section class="admin-card" id="cadastro-servico">
+  <div class="admin-card-topo">
+    <h2>Cadastrar serviço</h2>
+    <p>Adicione serviços com valor e link.</p>
+  </div>
+
+  <form id="form-servico" class="form-admin">
+    <div class="campo">
+      <label for="servicoNome">Nome do serviço</label>
+      <input type="text" id="servicoNome" required />
+    </div>
+
+    <div class="campo">
+      <label for="servicoDescricao">Descrição</label>
+      <textarea id="servicoDescricao" rows="4" required></textarea>
+    </div>
+
+    <div class="dupla">
+      <div class="campo">
+        <label for="servicoImagem">URL da imagem</label>
+        <input type="text" id="servicoImagem" placeholder="https://..." />
+      </div>
+
+      <div class="campo">
+        <label for="servicoValor">Valor</label>
+        <input type="number" id="servicoValor" step="0.01" min="0" />
+      </div>
+    </div>
+
+    <div class="campo">
+      <label for="servicoLink">Link do serviço</label>
+      <input type="text" id="servicoLink" placeholder="https://wa.me/..." />
+    </div>
+
+    <div class="checks">
+      <label class="check-item">
+        <input type="checkbox" id="servicoDestaque" />
+        <span>Serviço em destaque</span>
+      </label>
+    </div>
+
+    <div class="form-acoes">
+      <button type="submit" class="btn btn-principal">Salvar serviço</button>
+      <button type="reset" class="btn btn-secundario">Limpar</button>
+    </div>
+  </form>
+
+  <div id="mensagem-servico" class="status-box neutro">
+    Preencha os dados do serviço.
+  </div>
+</section>
+
+<section class="admin-card" id="lista-servicos">
+  <div class="admin-card-topo">
+    <h2>Serviços cadastrados</h2>
+    <p>Lista de serviços do banco.</p>
+  </div>
+
+  <div class="lista-acoes">
+    <button id="btn-recarregar-servicos" class="btn btn-secundario" type="button">
+      Recarregar serviços
+    </button>
+  </div>
+
+  <div id="lista-admin-servicos" class="lista-admin-produtos">
+    <div class="produto-admin-vazio">Nenhum serviço carregado ainda.</div>
+  </div>
+</section>

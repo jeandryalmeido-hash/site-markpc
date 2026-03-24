@@ -190,4 +190,144 @@ formProduto.addEventListener("submit", salvarProduto);
 btnTestarConexao.addEventListener("click", testarConexao);
 btnRecarregar.addEventListener("click", carregarProdutosAdmin);
 
-carregarProdutosAdmin();
+carregarProdutosAdmin();const formServico = document.getElementById("form-servico");
+const mensagemServico = document.getElementById("mensagem-servico");
+const listaAdminServicos = document.getElementById("lista-admin-servicos");
+const btnRecarregarServicos = document.getElementById("btn-recarregar-servicos");
+
+const API_SALVAR_SERVICO = "/api/salvar-servico";
+const API_LISTAR_SERVICO = "/api/listar-servico";
+const API_DELETAR_SERVICO = "/api/deletar-servico";
+
+function setMensagemServico(texto, tipo = "neutro") {
+  if (!mensagemServico) return;
+  mensagemServico.className = `status-box ${tipo}`;
+  mensagemServico.textContent = texto;
+}
+
+function criarCardServicoAdmin(servico) {
+  return `
+    <div class="item-admin-produto">
+      <div class="item-admin-produto-topo">
+        <div>
+          <h3>${servico.nome || "Sem nome"}</h3>
+          <p>${servico.descricao || "Sem descrição"}</p>
+        </div>
+
+        <button
+          class="btn-excluir"
+          type="button"
+          onclick="deletarServico('${servico._id}')"
+        >
+          Excluir
+        </button>
+      </div>
+
+      <div class="item-admin-meta">
+        ${servico.destaque ? `<span class="badge destaque">Destaque</span>` : ""}
+        ${servico.valor ? `<span class="badge estoque">R$ ${servico.valor}</span>` : ""}
+      </div>
+
+      ${
+        servico.link
+          ? `<div class="item-admin-meta">
+               <a class="btn btn-secundario" href="${servico.link}" target="_blank">Abrir link</a>
+             </div>`
+          : ""
+      }
+    </div>
+  `;
+}
+
+async function carregarServicosAdmin() {
+  if (!listaAdminServicos) return;
+
+  listaAdminServicos.innerHTML = `<div class="produto-admin-vazio">Carregando serviços...</div>`;
+
+  try {
+    const resposta = await fetch(API_LISTAR_SERVICO);
+    const dados = await resposta.json();
+
+    if (!Array.isArray(dados) || dados.length === 0) {
+      listaAdminServicos.innerHTML = `<div class="produto-admin-vazio">Nenhum serviço cadastrado ainda.</div>`;
+      return;
+    }
+
+    listaAdminServicos.innerHTML = dados.map(criarCardServicoAdmin).join("");
+  } catch (erro) {
+    listaAdminServicos.innerHTML = `<div class="produto-admin-vazio">Não foi possível carregar os serviços.</div>`;
+  }
+}
+
+async function salvarServico(evento) {
+  evento.preventDefault();
+
+  const servico = {
+    nome: document.getElementById("servicoNome").value.trim(),
+    descricao: document.getElementById("servicoDescricao").value.trim(),
+    imagem: document.getElementById("servicoImagem").value.trim(),
+    valor: document.getElementById("servicoValor").value,
+    link: document.getElementById("servicoLink").value.trim(),
+    destaque: document.getElementById("servicoDestaque").checked
+  };
+
+  if (!servico.nome || !servico.descricao) {
+    setMensagemServico("Preencha nome e descrição do serviço.", "erro");
+    return;
+  }
+
+  try {
+    const resposta = await fetch(API_SALVAR_SERVICO, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(servico)
+    });
+
+    const dados = await resposta.json();
+
+    if (!resposta.ok) {
+      throw new Error(dados.erro || "Erro ao salvar serviço");
+    }
+
+    setMensagemServico("Serviço salvo com sucesso.", "sucesso");
+    formServico.reset();
+    await carregarServicosAdmin();
+  } catch (erro) {
+    setMensagemServico(`Erro ao salvar serviço: ${erro.message}`, "erro");
+  }
+}
+
+async function deletarServico(id) {
+  const confirmar = window.confirm("Tem certeza que deseja excluir este serviço?");
+  if (!confirmar) return;
+
+  try {
+    const resposta = await fetch(`${API_DELETAR_SERVICO}?id=${id}`, {
+      method: "DELETE"
+    });
+
+    const dados = await resposta.json();
+
+    if (!resposta.ok) {
+      throw new Error(dados.erro || "Erro ao deletar serviço");
+    }
+
+    setMensagemServico("Serviço excluído com sucesso.", "sucesso");
+    await carregarServicosAdmin();
+  } catch (erro) {
+    setMensagemServico(`Erro ao excluir serviço: ${erro.message}`, "erro");
+  }
+}
+
+if (formServico) {
+  formServico.addEventListener("submit", salvarServico);
+}
+
+if (btnRecarregarServicos) {
+  btnRecarregarServicos.addEventListener("click", carregarServicosAdmin);
+}
+
+carregarServicosAdmin();
+window.deletarServico = deletarServico;

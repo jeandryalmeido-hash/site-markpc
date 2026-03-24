@@ -90,4 +90,41 @@ function criarCardProduto(p) {
 }
 
 // Inicializar
-carregarProdutos();
+carregarProdutos();async function carregarServicos() {
+  const container = document.getElementById("lista-servicos");
+  if (!container) return;
+
+  try {
+    const res = await fetch("/api/listar-servico");
+    const servicos = await res.json();
+
+    if (!Array.isArray(servicos) || servicos.length === 0) {
+      container.innerHTML = `
+        <div class="card-servico">
+          <h3>Serviços em breve</h3>
+          <p>Cadastre serviços no painel administrativo.</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = servicos.map((s) => `
+      <article class="card-servico">
+        ${s.imagem ? `<img src="${s.imagem}" class="produto-img" alt="${s.nome}">` : ""}
+        <h3>${s.nome}</h3>
+        <p>${s.descricao}</p>
+        ${s.valor ? `<p><strong style="color:#22c55e;">R$ ${s.valor}</strong></p>` : ""}
+        <a href="${s.link || '#'}" target="_blank">Solicitar</a>
+      </article>
+    `).join("");
+  } catch (erro) {
+    container.innerHTML = `
+      <div class="card-servico">
+        <h3>Erro ao carregar serviços</h3>
+        <p>Tente novamente mais tarde.</p>
+      </div>
+    `;
+  }
+}
+
+carregarServicos();
