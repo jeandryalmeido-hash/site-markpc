@@ -330,4 +330,11 @@ if (btnRecarregarServicos) {
 }
 
 carregarServicosAdmin();
-window.deletarServico = deletarServico;
+window.deletarServico = deletarServico;const btnSairAdmin = document.getElementById("btn-sair-admin");
+
+if (btnSairAdmin) {
+  btnSairAdmin.addEventListener("click", () => {
+    localStorage.removeItem("markpc_admin_logado");
+    window.location.href = "admin-login.html";
+  });
+}

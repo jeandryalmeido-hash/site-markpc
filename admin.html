@@ -208,4 +208,10 @@
   <div id="lista-admin-servicos" class="lista-admin-produtos">
     <div class="produto-admin-vazio">Nenhum serviço carregado ainda.</div>
   </div>
-</section>
+</section><script>
+  if (localStorage.getItem("markpc_admin_logado") !== "true") {
+    window.location.href = "admin-login.html";
+  }
+</script><button id="btn-sair-admin" class="btn btn-secundario" type="button">
+  Sair
+</button>

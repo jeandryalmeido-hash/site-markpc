@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login Admin - MarkPC</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="admin-body">
+  <main class="login-admin-wrap">
+    <section class="login-admin-card">
+      <div class="login-admin-topo">
+        <span class="mini-tag">Área restrita</span>
+        <h1>Entrar no painel</h1>
+        <p>Use seu login para acessar o administrativo da MarkPC.</p>
+      </div>
+
+      <form id="form-login-admin" class="form-admin">
+        <div class="campo">
+          <label for="loginUsuario">Usuário</label>
+          <input type="text" id="loginUsuario" placeholder="Digite seu usuário" required />
+        </div>
+
+        <div class="campo">
+          <label for="loginSenha">Senha</label>
+          <input type="password" id="loginSenha" placeholder="Digite sua senha" required />
+        </div>
+
+        <div class="form-acoes">
+          <button type="submit" class="btn btn-principal">Entrar</button>
+          <a href="index.html" class="btn btn-secundario">Voltar ao site</a>
+        </div>
+      </form>
+
+      <div id="mensagem-login-admin" class="status-box neutro">
+        Digite seu usuário e senha.
+      </div>
+    </section>
+  </main>
+
+  <script src="admin-login.js"></script>
+</body>
+</html>
