@@ -1,7 +1,6 @@
 const { MongoClient } = require("mongodb");
 
-const uri = process.env.MONGO_URL;
-
+const uri = process.env.MONGODB_URI;
 if (!uri) {
   throw new Error("MONGO_URL não definida");
 }
